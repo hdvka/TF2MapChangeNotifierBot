@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  tf2mapchangenotifierbot:
+    image: tf2mapchangenotifierbot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - .:/app
+      - sqlite-data:/app/db
+volumes:
+  sqlite-data:
