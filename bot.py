@@ -45,17 +45,6 @@ async def current_map_handler(ctx):
 async def am_i_playing_handler(ctx):
     await ctx.send(await am_i_playing(SERVER_ADDRESS))
 
-""" @bot.command(name='what_am_i_playing', help='What am I playing according to Discord?')
-async def activity(ctx, user: discord.Member):
-    try:
-        for activity in user.activities:
-            if activity.type == discord.ActivityType.playing:
-                await ctx.send(f"{user.name} is playing {activity.name}")
-                return
-        await ctx.send(f"{user.name} is not playing anything.")
-    except discord.NotFound:
-        await ctx.send("User not found.") """
-
 async def get_map(address):
     info = await a2s.ainfo(address)
     return info.map_name
