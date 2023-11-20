@@ -3,11 +3,8 @@ import os
 import a2s
 import asyncio
 import discord
-import logging
 from dotenv import load_dotenv
 from discord.ext import commands
-
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
