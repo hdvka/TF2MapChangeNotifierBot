@@ -24,9 +24,9 @@ async def check_map_periodically(address):
     global last_map
     while True:
         current_map = await get_map(address)
-        if current_map != last_map:
+        if current_map is not None and current_map != last_map:
             playing = await am_i_playing(address)
-            if not playing:
+            if playing is not None and not playing:
                 channel = discord.utils.get(bot.get_all_channels(), name='general')
                 if channel:
                     await channel.send(f"The map has changed to: {current_map}")
@@ -46,14 +46,17 @@ async def am_i_playing_handler(ctx):
     await ctx.send(await am_i_playing(SERVER_ADDRESS))
 
 async def get_map(address):
-    info = await a2s.ainfo(address)
-    return info.map_name
+    try:
+        info = await a2s.ainfo(address)
+        return info.map_name
+    except:
+        return None
 
 async def am_i_playing(address):
     try:
         players = await a2s.aplayers(address=address)
         return any(player.name == STEAM_NAME for player in players)
     except:
-        return False
+        return None
 
 bot.run(TOKEN)
