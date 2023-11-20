@@ -1,3 +1,5 @@
 .env
 *.log
 .vscode/**
+tf2.db
+data/servers.txt
