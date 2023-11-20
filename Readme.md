@@ -6,4 +6,8 @@ My first discord bot! Checks the current map on Uncletopia Chicago 1 every 30 se
 
 ### `!current_map`
 
-Displays the current map
+Displays the current map.
+
+### `!am_i_playing`
+
+Returns a bool indicating whether I'm currently on the monitored server.
