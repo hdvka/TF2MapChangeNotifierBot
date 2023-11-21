@@ -34,7 +34,7 @@ cursor.execute('''
 ''')
 
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS map_change_events (
+    CREATE TABLE IF NOT EXISTS server_map_changes (
         id INT PRIMARY KEY,
         map_id INT,
         server_id INT,
