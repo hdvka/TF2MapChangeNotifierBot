@@ -35,10 +35,10 @@ cursor.execute('''
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS server_map_changes (
-        id INT PRIMARY KEY,
-        map_id INT,
-        server_id INT,
-        player_count INT DEFAULT 0,
+        id INTEGER PRIMARY KEY,
+        map_id INTEGER,
+        server_id INTEGER,
+        player_count INTEGER DEFAULT 0,
         created DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (map_id) REFERENCES maps(id),
         FOREIGN KEY (server_id) REFERENCES servers(id)
