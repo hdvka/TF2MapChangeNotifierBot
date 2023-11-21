@@ -3,3 +3,4 @@
 .vscode/**
 tf2.db
 data/servers.txt
+.vscode/settings.json

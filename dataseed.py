@@ -34,12 +34,12 @@ cursor.execute('''
 ''')
 
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS map_server_usage (
+    CREATE TABLE IF NOT EXISTS map_change_events (
         id INT PRIMARY KEY,
         map_id INT,
         server_id INT,
-        play_count INT DEFAULT 0,
-        last_played DATETIME DEFAULT CURRENT_TIMESTAMP,
+        player_count INT DEFAULT 0,
+        created DATETIME DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (map_id) REFERENCES maps(id),
         FOREIGN KEY (server_id) REFERENCES servers(id)
     )
