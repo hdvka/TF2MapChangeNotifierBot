@@ -56,8 +56,7 @@ def initialize_data():
 fave_server_entry = next(filter(lambda x: x.id == FAVE_SERVER_ID, servers), servers[0])
 FAVE_SERVER_ADDRESS = (fave_server_entry.ip, fave_server_entry.port)
 
-def get_most_recent_map_name(server):
-    conn = sqlite3.connect('tf2.db')
+def get_most_recent_map_name(server, conn):
     cursor = conn.cursor()
 
     select_sql = '''
@@ -72,12 +71,9 @@ def get_most_recent_map_name(server):
 
     result = cursor.fetchone()
 
-    conn.close()
-
     return result[0] if result else None
 
-def record_server_map_change(server, map_name):
-    conn = sqlite3.connect('tf2.db')
+def record_server_map_change(server, map_name, conn):
     cursor = conn.cursor()
 
     select_sql = '''
@@ -95,9 +91,9 @@ def record_server_map_change(server, map_name):
 
         player_count = 24 # TODO: Make this dynamic
 
-        cursor.execute(insert_sql, (map_id_tuple[0], server.id, player_count))
+        conn.commit()
 
-        conn.close()
+        cursor.execute(insert_sql, (map_id_tuple[0], server.id, player_count))
     else:
         insert_sql = '''
         INSERT INTO maps (name) 
@@ -106,22 +102,25 @@ def record_server_map_change(server, map_name):
 
         cursor.execute(insert_sql, (map_name,))
 
-        conn.close()
+        conn.commit()
 
-        record_server_map_change(server, map_name)
+        record_server_map_change(server, map_name, conn)
 
 async def check_map_periodically(server):
     while True:
         current_map_name = await get_map(server.address)
         if current_map_name is not None:
-            most_recent_map_name = get_most_recent_map_name(server)
+            conn = sqlite3.connect('tf2.db')
+            most_recent_map_name = get_most_recent_map_name(server, conn)
             if most_recent_map_name != current_map_name:
-                record_server_map_change(server, current_map_name)
+                record_server_map_change(server, current_map_name, conn)
                 playing = await am_i_playing_on_server(server.address)
                 if playing is not None and not playing:
                     channel = discord.utils.get(bot.get_all_channels(), name='general')
                     if channel:
                         await channel.send(f"The map has changed to: {current_map_name}")
+            conn.commit()
+            conn.close()
         await asyncio.sleep(60)  # Wait for 60 seconds before checking again
 
 @bot.event
