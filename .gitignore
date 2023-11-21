@@ -4,3 +4,4 @@
 tf2.db
 data/servers.txt
 .vscode/settings.json
+__pycache__/models.cpython-39.pyc

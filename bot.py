@@ -54,7 +54,7 @@ def get_most_recent_map_name(server, conn):
 
     return result[0] if result else None
 
-def record_server_map_change(server, map_name, conn):
+def record_server_map_change(server, map_name, player_count, conn):
     cursor = conn.cursor()
 
     select_sql = '''
@@ -69,8 +69,6 @@ def record_server_map_change(server, map_name, conn):
         INSERT INTO server_map_changes (map_id, server_id, player_count) 
         VALUES (?, ?, ?)
         '''
-
-        player_count = 24 # TODO: Make this dynamic
 
         conn.commit()
 
@@ -89,17 +87,17 @@ def record_server_map_change(server, map_name, conn):
 
 async def check_map_periodically(server):
     while True:
-        current_map_name = await get_map(server.address)
-        if current_map_name is not None:
+        current_map = await get_map(server.address)
+        if current_map is not None:
             conn = sqlite3.connect('tf2.db')
             most_recent_map_name = get_most_recent_map_name(server, conn)
-            if most_recent_map_name != current_map_name:
-                record_server_map_change(server, current_map_name, conn)
+            if most_recent_map_name != current_map.map_name:
+                record_server_map_change(server, current_map.map_name, current_map.player_count, conn)
                 playing = await am_i_playing_on_server(server.address)
-                if playing is not None and not playing:
+                if playing is not None and not playing and current_map.player_count > 10: # Adjust to taste
                     channel = discord.utils.get(bot.get_all_channels(), name='general')
                     if channel:
-                        await channel.send(f"The map has changed to: {current_map_name}")
+                        await channel.send(f"The map on {server.name} has changed from {most_recent_map_name} to {current_map.map_name}")
             conn.commit()
             conn.close()
         await asyncio.sleep(60)  # Wait for 60 seconds before checking again
@@ -124,7 +122,7 @@ async def am_i_playing_handler(ctx):
 async def get_map(address):
     try:
         info = await a2s.ainfo(address)
-        return info.map_name
+        return info
     except:
         return None
 
