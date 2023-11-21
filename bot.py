@@ -18,9 +18,7 @@ intents.message_content = True  # Enable message content intent
 
 bot = commands.Bot(intents=intents, command_prefix='!')
 
-last_map = "fake_map"  # Global variable to store the last known map
-
-def initialize_data():
+def get_servers():
     conn = sqlite3.connect('tf2.db')
     cursor = conn.cursor()
 
@@ -35,26 +33,9 @@ def initialize_data():
         id=server[0], ip=server[1], port=server[2], name=server[3], map_type=server[4]
         ) for server in raw_servers]
 
-    maps_query = '''
-        SELECT id, name FROM maps
-    '''
-
-    cursor.execute(maps_query)
-
-    raw_maps = cursor.fetchall()
-    maps = [Map(
-        id=tf2_map[0], name=tf2_map[1]
-        ) for tf2_map in raw_maps]
-
     conn.close()
 
-    return (servers, maps)
-
-(servers, maps) = initialize_data()
-
-# If the fave server ID isn't present, just grab the first one (which is conveniently my fave anyway)
-fave_server_entry = next(filter(lambda x: x.id == FAVE_SERVER_ID, servers), servers[0])
-FAVE_SERVER_ADDRESS = (fave_server_entry.ip, fave_server_entry.port)
+    return servers
 
 def get_most_recent_map_name(server, conn):
     cursor = conn.cursor()
@@ -125,15 +106,18 @@ async def check_map_periodically(server):
 
 @bot.event
 async def on_ready():
-    for server in servers:
+    for server in get_servers():
         bot.loop.create_task(check_map_periodically(server))
         await asyncio.sleep(4)  # stagger the tasks
 
-@bot.command(name='current_map', help='Current map of Uncletopia Chicago 1.')
+@bot.command(name='current_map', help='Current map of favorited server.')
 async def current_map_handler(ctx):
-    await ctx.send(await get_map(FAVE_SERVER_ADDRESS))
+    servers = get_servers()
+    # If the fave server ID isn't present, just grab the first one (which is conveniently my fave anyway)
+    fave_server_entry = next(filter(lambda x: x.id == FAVE_SERVER_ID, servers), servers[0])
+    await ctx.send(await get_map(fave_server_entry.address))
 
-@bot.command(name='am_i_playing', help='Am I on the currently monitored server?.')
+@bot.command(name='am_i_playing', help='Am I playing on any server?')
 async def am_i_playing_handler(ctx):
     await ctx.send(await am_i_playing())
 
@@ -146,7 +130,7 @@ async def get_map(address):
 
 async def am_i_playing():
     playing = False
-    for server in servers:
+    for server in get_servers():
         server_address = (server.ip, server.port)
         playing_on_server = await am_i_playing_on_server(server_address)
         if playing_on_server:
