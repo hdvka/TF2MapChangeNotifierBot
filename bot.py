@@ -83,7 +83,7 @@ def record_server_map_change(server, map_name, player_count, conn):
 
         conn.commit()
 
-        record_server_map_change(server, map_name, conn)
+        record_server_map_change(server, map_name, player_count, conn)
 
 async def check_map_periodically(server):
     while True:
