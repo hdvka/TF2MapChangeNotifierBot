@@ -97,7 +97,7 @@ async def check_map_periodically(server):
                 if playing is not None and not playing and current_map.player_count > 10: # Adjust to taste
                     channel = discord.utils.get(bot.get_all_channels(), name='general')
                     if channel:
-                        await channel.send(f"The map on {server.name} has changed from {most_recent_map_name} to {current_map.map_name}")
+                        await channel.send(f"The map on **{server.name}** has changed to **{current_map.map_name}**")
             conn.commit()
             conn.close()
         await asyncio.sleep(60)  # Wait for 60 seconds before checking again
