@@ -113,7 +113,7 @@ async def current_map_handler(ctx):
     servers = get_servers()
     # If the fave server ID isn't present, just grab the first one (which is conveniently my fave anyway)
     fave_server_entry = next(filter(lambda x: x.id == FAVE_SERVER_ID, servers), servers[0])
-    await ctx.send(await get_map(fave_server_entry.address))
+    await ctx.send((await get_map(fave_server_entry.address)).map_name)
 
 @bot.command(name='am_i_playing', help='Am I playing on any server?')
 async def am_i_playing_handler(ctx):
