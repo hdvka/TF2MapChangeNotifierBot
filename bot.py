@@ -37,6 +37,26 @@ def get_servers():
 
     return servers
 
+def get_top_ten():
+    conn = sqlite3.connect('tf2.db')
+    cursor = conn.cursor()
+
+    top_ten_sql = """
+        SELECT m.name, SUM(smc.player_count) AS total_players
+        FROM server_map_changes smc
+        LEFT JOIN maps m on m.id = smc.map_id
+        GROUP BY map_id
+        ORDER BY total_players DESC
+        LIMIT 10
+    """
+    cursor.execute(top_ten_sql)
+
+    raw_maps = cursor.fetchall()
+
+    conn.close()
+
+    return "\n".join([map[0] for map in raw_maps])
+
 def get_most_recent_map_name(server, conn):
     cursor = conn.cursor()
 
@@ -118,6 +138,10 @@ async def current_map_handler(ctx):
 @bot.command(name='am_i_playing', help='Am I playing on any server?')
 async def am_i_playing_handler(ctx):
     await ctx.send(await am_i_playing())
+
+@bot.command(name='top_ten', help='Top 10 most popular maps')
+async def top_ten_handler(ctx):
+    await ctx.send(get_top_ten())
 
 async def get_map(address):
     try:
